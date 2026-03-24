@@ -29,19 +29,19 @@ st.title("📊 Graph + LLM Query System")
 col1, col2 = st.columns([3, 1])
 
 # -----------------------------
-# Initialize highlight IDs
+# Session State
 # -----------------------------
 if "highlight_ids" not in st.session_state:
     st.session_state.highlight_ids = set()
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
 # -----------------------------
 # RIGHT: Chat Interface
 # -----------------------------
 with col2:
     st.subheader("💬 Chat with Graph")
-
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
 
     question = st.text_input("Ask something about your data")
 
@@ -51,26 +51,34 @@ with col2:
             st.warning("This system is designed for dataset-related queries only.")
             st.stop()
 
+        # Generate Cypher
         cypher = generate_cypher(question)
+
+        # Execute query
         result = run_query(cypher)
 
+        # -----------------------------
+        # -----------------------------
+        # ✅ FIXED HIGHLIGHT LOGIC
+        # -----------------------------
         highlight_ids = set()
 
-        # -----------------------------
-        # Extract IDs for highlighting
-        # -----------------------------
         if result:
             for r in result:
-                for key in r:
-                    value = r[key]
+                for key, value in r.items():
 
-                    if isinstance(value, dict) and "id" in value:
-                        highlight_ids.add(value["id"])
+                    # ✅ Neo4j Node object
+                    if hasattr(value, "id"):
+                        highlight_ids.add(str(value.id))
 
-                    elif isinstance(value, int):
-                        highlight_ids.add(value)
+                    # Case 2: keys like "i.id", "j.id"
+                    elif key.endswith(".id"):
+                        highlight_ids.add(str(value))
 
-        # Save highlight IDs
+        # Limit (optional)
+        highlight_ids = set(list(highlight_ids)[:30])
+
+        # Save
         st.session_state.highlight_ids = highlight_ids
 
         # -----------------------------
@@ -93,6 +101,7 @@ with col2:
                     answer = f"Customer ID: {record['c']['id']}"
 
                 elif "payment_count" in record:
+
                     if "i.id" in record:
                         answer = "📊 Top invoices by payments:\n"
                         for r in result:
@@ -132,7 +141,8 @@ with col2:
         st.session_state.chat_history.append(("You", question))
         st.session_state.chat_history.append(("AI", answer))
 
-        st.rerun()  # 🔥 IMPORTANT (refresh UI)
+        # 🔥 Refresh UI
+        st.rerun()
 
     # -----------------------------
     # Display Chat
@@ -161,7 +171,7 @@ with col2:
             )
 
 # -----------------------------
-# LEFT: Graph Visualization (UPDATED)
+# LEFT: Graph
 # -----------------------------
 with col1:
     st.subheader("📌 Graph View")

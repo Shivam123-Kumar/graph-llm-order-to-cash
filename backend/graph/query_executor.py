@@ -1,13 +1,14 @@
-from backend.db.neo4j_driver import get_driver
+from backend.db.neo4j_driver import get_session
 
 def run_query(query):
-    driver = get_driver()
+    try:
+        with get_session() as session:
+            result = session.run(query)
 
-    with driver.session() as session:
-        result = session.run(query)
+            records = [record.data() for record in result]
 
-        records = []
-        for record in result:
-            records.append(record.data())
+            return records
 
-        return records
+    except Exception as e:
+        print("❌ Query Execution Error:", e)
+        return []

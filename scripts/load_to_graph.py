@@ -1,14 +1,21 @@
 from neo4j import GraphDatabase
 import pandas as pd
-
+import os
 # -----------------------------
 # CONNECT TO NEO4J
 # -----------------------------
-URI = "bolt://127.0.0.1:7687"
-USER = "neo4j"
-PASSWORD = "password"
+import os
+from neo4j import GraphDatabase
+from dotenv import load_dotenv
+load_dotenv()
+URI = os.getenv("NEO4J_URI")
+USER = os.getenv("NEO4J_USER")
+PASSWORD = os.getenv("NEO4J_PASSWORD")
+DATABASE = os.getenv("NEO4J_DATABASE")
+
 
 driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+
 
 
 # -----------------------------
@@ -162,7 +169,7 @@ def link_payment_journal(session):
 def main():
 
     # -------- NODES --------
-    with driver.session() as session:
+    with driver.session(database=DATABASE) as session:
         print("🚀 Creating nodes...")
         create_sales_orders(session)
         create_customers(session)
@@ -173,14 +180,13 @@ def main():
     print("✅ Nodes Done!")
 
     # -------- RELATIONSHIPS --------
-    with driver.session() as session:
+    with driver.session(database=DATABASE) as session:
         print("🔗 Creating relationships...")
         link_order_customer(session)
         link_invoice_customer(session)
         link_invoice_journal(session)
-        link_payment_invoice_via_journal(session)
         link_payment_journal(session)
-
+        link_payment_invoice_via_journal(session)
     print("🎉 Graph Fully Loaded!")
 
 # def main():

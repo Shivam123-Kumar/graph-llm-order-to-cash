@@ -1,6 +1,7 @@
 from pyvis.network import Network
 
 def build_graph_html(nodes, edges):
+
     net = Network(
         height="600px",
         width="100%",
@@ -9,19 +10,21 @@ def build_graph_html(nodes, edges):
     )
 
     # -----------------------------
-    # Add nodes (UPDATED)
+    # ADD NODES (FIXED)
     # -----------------------------
     for node in nodes:
+
         color = "red" if node.get("highlight") else "#97C2FC"
 
         net.add_node(
             node["id"],
             label=node["label"],
-            color=color
+            color=color,   # 🔥 THIS IS KEY
+            title=node["label"]
         )
 
     # -----------------------------
-    # Add edges (UPDATED)
+    # ADD EDGES
     # -----------------------------
     for edge in edges:
         net.add_edge(
@@ -30,10 +33,7 @@ def build_graph_html(nodes, edges):
             label=edge["label"]
         )
 
-    # Layout
     net.repulsion()
 
-    # Save graph
     net.save_graph("graph.html")
-
     return "graph.html"
