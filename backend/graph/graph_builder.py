@@ -5,27 +5,47 @@ def fetch_graph_data(highlight_ids=None):
     if highlight_ids is None:
         highlight_ids = set()
 
-    query = """
-    MATCH (n)-[r]->(m)
-    RETURN n, r, m, id(n) as n_id, id(m) as m_id
-    LIMIT 100
-    """
-
     try:
         with get_session() as session:
-            result = session.run(query)
+            
+            if highlight_ids:
+                ids_list = list(highlight_ids)
+                query = """
+                MATCH (n)-[r]-(m)
+                WHERE toString(n.id) IN $ids OR elementId(n) IN $ids OR toString(m.id) IN $ids OR elementId(m) IN $ids
+                RETURN n, r, m, elementId(n) as n_id, elementId(m) as m_id
+                LIMIT 100
+                """
+                result = session.run(query, ids=ids_list)
+                records = list(result)
+                
+                # If surprisingly few results, optionally pad with generic edges
+                if len(records) < 10:
+                    generic_query = """
+                    MATCH (n)-[r]->(m)
+                    RETURN n, r, m, elementId(n) as n_id, elementId(m) as m_id
+                    LIMIT 50
+                    """
+                    records.extend(list(session.run(generic_query)))
+            else:
+                query = """
+                MATCH (n)-[r]->(m)
+                RETURN n, r, m, elementId(n) as n_id, elementId(m) as m_id
+                LIMIT 100
+                """
+                records = list(session.run(query))
 
             nodes = {}
             edges = []
 
-            for record in result:
+            for record in records:
                 n = record["n"]
                 m = record["m"]
                 r = record["r"]
 
-                # ✅ FIXED IDS (Neo4j internal)
-                n_id = str(record["n_id"])
-                m_id = str(record["m_id"])
+                # ✅ FIXED IDS (Neo4j business ID with fallback to internal)
+                n_id = str(n.get("id", record["n_id"]))
+                m_id = str(m.get("id", record["m_id"]))
 
                 if n_id is None or m_id is None:
                     continue

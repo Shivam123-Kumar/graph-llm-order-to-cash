@@ -1,6 +1,21 @@
-.env
+# Virtual environment
 .venv/
+
+# Env files
+.env
+.env.*
+
+# Python cache
 __pycache__/
 *.pyc
-graph.html
-data/
+
+# Logs / outputs
+*.txt
+*.log
+*.json
+
+# Generated graph files
+*.html
+
+# OS files
+.DS_Store

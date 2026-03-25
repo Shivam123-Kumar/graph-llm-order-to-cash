@@ -21,11 +21,20 @@ client = OpenAI(
 GRAPH_SCHEMA = """
 Nodes:
 - Customer(id)
+- Address(id)
+- Product(id)
+- SalesOrder(id)
+- Delivery(id)
 - Invoice(id)
 - Payment(id)
 - JournalEntry(id)
 
 Relationships:
+- (:SalesOrder)-[:PLACED_BY]->(:Customer)
+- (:Customer)-[:HAS_ADDRESS]->(:Address)
+- (:SalesOrder)-[:CONTAINS]->(:Product)
+- (:SalesOrder)-[:DELIVERED_TO]->(:Delivery)
+- (:Delivery)-[:GENERATES]->(:Invoice)
 - (:Invoice)-[:BILLED_TO]->(:Customer)
 - (:Invoice)-[:RECORDED_AS]->(:JournalEntry)
 - (:Payment)-[:RECORDED_AS]->(:JournalEntry)

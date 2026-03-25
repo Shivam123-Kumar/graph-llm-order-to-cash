@@ -60,8 +60,11 @@ def main():
     base_path = "data"
 
     sales_orders = load_jsonl_folder(f"{base_path}/sales_order_headers")
+    sales_order_items = load_jsonl_folder(f"{base_path}/sales_order_items")
     deliveries = load_jsonl_folder(f"{base_path}/outbound_delivery_headers")
+    delivery_items = load_jsonl_folder(f"{base_path}/outbound_delivery_items")
     invoices = load_jsonl_folder(f"{base_path}/billing_document_headers")
+    invoice_items = load_jsonl_folder(f"{base_path}/billing_document_items")
     payments = load_jsonl_folder(f"{base_path}/payments_accounts_receivable")
     journal_entries = load_jsonl_folder(f"{base_path}/journal_entry_items_accounts_receivable")
 
@@ -69,32 +72,33 @@ def main():
     addresses = load_jsonl_folder(f"{base_path}/business_partner_addresses")
     products = load_jsonl_folder(f"{base_path}/products")
 
-    # Inspect
-    inspect(sales_orders, "Sales Orders")
-    inspect(deliveries, "Deliveries")
-    inspect(invoices, "Invoices")
-    inspect(payments, "Payments")
-    inspect(journal_entries, "Journal Entries")
-
-    # Clean
     # Clean
     sales_orders = clean_dataframe(sales_orders)
+    sales_order_items = clean_dataframe(sales_order_items)
     deliveries = clean_dataframe(deliveries)
+    delivery_items = clean_dataframe(delivery_items)
     invoices = clean_dataframe(invoices)
+    invoice_items = clean_dataframe(invoice_items)
     payments = clean_dataframe(payments)
     journal_entries = clean_dataframe(journal_entries)
     customers = clean_dataframe(customers)
+    addresses = clean_dataframe(addresses)
+    products = clean_dataframe(products)
 
     # Save
     save_dataframe(sales_orders, "sales_orders")
+    save_dataframe(sales_order_items, "sales_order_items")
     save_dataframe(deliveries, "deliveries")
+    save_dataframe(delivery_items, "delivery_items")
     save_dataframe(invoices, "invoices")
+    save_dataframe(invoice_items, "invoice_items")
     save_dataframe(payments, "payments")
     save_dataframe(journal_entries, "journal_entries")
     save_dataframe(customers, "customers")
+    save_dataframe(addresses, "addresses")
+    save_dataframe(products, "products")
 
     print("\n✅ Done!")
-
 
 # -----------------------------
 # 3. ENTRY POINT LAST

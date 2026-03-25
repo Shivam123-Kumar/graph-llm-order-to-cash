@@ -67,8 +67,12 @@ with col2:
             for r in result:
                 for key, value in r.items():
 
-                    # ✅ Neo4j Node object
-                    if hasattr(value, "id"):
+                    # ✅ Handle converted `.data()` dictionaries from query_executor.py
+                    if isinstance(value, dict) and "id" in value:
+                        highlight_ids.add(str(value["id"]))
+
+                    # ✅ Handle direct Neo4j Node objects
+                    elif hasattr(value, "id"):
                         highlight_ids.add(str(value.id))
 
                     # Case 2: keys like "i.id", "j.id"
